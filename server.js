@@ -15,6 +15,7 @@ import fs       from 'fs';
 import archiver from 'archiver';
 import { fileURLToPath } from 'url';
 import pino     from 'pino';
+import { spawn, execSync } from 'child_process';
 import {
   makeWASocket,
   useMultiFileAuthState,
@@ -419,9 +420,12 @@ process.on('SIGINT',  shutdown);
 process.on('SIGTERM', shutdown);
 
 /* ─── Cloudflare Tunnel (auto) ─── */
-import { spawn, execSync } from 'child_process';
-
 function startCloudflaredTunnel() {
+  // Skip on Back4App / Docker — no cloudflared needed
+  if (process.env.DISABLE_TUNNEL === '1') {
+    console.log('[tunnel] ⏭  Tunnel disabled via env');
+    return;
+  }
   const token = process.env.CF_TUNNEL_TOKEN || 'eyJhIjoiYmEyYmNhZGQ4NGVmOWNkYTQxZTNkYTNkZDc1MTIwYmIiLCJ0IjoiZDg4NDYyMmItYjZhMC00ZDE0LThiMTAtNTU0NjUzYzUyNzBhIiwicyI6IlpHVTBNbUV6WXpNdE5qUmxaQzAwWXpSbUxUbG1ZbVl0TWpCbU9EQXhPR00yTm1WaiJ9';
   if (!token) {
     console.log('[tunnel] ⚠️  CF_TUNNEL_TOKEN غير محدد — شغّال بدون HTTPS');
