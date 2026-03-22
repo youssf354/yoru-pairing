@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>𖤍 Yoru · Pairing 𖤍</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;700&family=Tajawal:wght@300;400;700;900&family=Cinzel+Decorative:wght@400;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --card-bg:     rgba(8, 3, 22, 0.72);
+      --border:      rgba(160, 120, 255, 0.18);
+      --border-glow: rgba(180, 140, 255, 0.45);
+      --violet:      #a78bfa;
+      --violet-dim:  #7c3aed;
+      --violet-glow: rgba(167, 139, 250, 0.25);
+      --rose:        #f9a8d4;
+      --text:        #ede8ff;
+      --muted:       #7868a6;
+      --error:       #fca5a5;
+      --success:     #4ade80;
+      --mono:        'Noto Serif JP', serif;
+      --sans:        'Tajawal', sans-serif;
+      --deco:        'Cinzel Decorative', serif;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { width: 100%; min-height: 100svh; }
+
+    body {
+      font-family: var(--sans);
+      color: var(--text);
+      display: grid;
+      place-items: center;
+      min-height: 100svh;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    .bg-image { position: fixed; inset: 0; z-index: 0; background: url('https://file.garden/aauvg01sjleV_ic1/9.jpg') center center / cover no-repeat; }
+    .bg-veil  { position: fixed; inset: 0; z-index: 1; background: linear-gradient(160deg, rgba(4,2,13,0.83) 0%, rgba(12,5,24,0.76) 40%, rgba(4,2,13,0.90) 100%); }
+    .bg-glow  { position: fixed; inset: 0; z-index: 2; pointer-events: none; background: radial-gradient(ellipse 60% 55% at 50% 18%, rgba(120,60,220,0.22) 0%, transparent 70%), radial-gradient(ellipse 40% 35% at 80% 80%, rgba(249,168,212,0.10) 0%, transparent 60%); }
+    .particles { position: fixed; inset: 0; z-index: 3; pointer-events: none; overflow: hidden; }
+    .p { position: absolute; opacity: 0; animation: floatUp var(--dur,8s) ease-in-out var(--delay,0s) infinite; }
+    @keyframes floatUp { 0%{opacity:0;transform:translateY(0) rotate(0deg) scale(1)} 10%{opacity:var(--op,.55)} 90%{opacity:var(--op,.55)} 100%{opacity:0;transform:translateY(-110vh) rotate(380deg) scale(.2)} }
+
+    /* ══ PAGES ══ */
+    .page { display: none; position: relative; z-index: 10; width: 100%; min-height: 100svh; display: none; place-items: center; padding: 24px 0; }
+    .page.active { display: grid; }
+
+    /* ══ WRAPPER ══ */
+    .wrapper { width: min(480px, 94vw); display: flex; flex-direction: column; align-items: center; animation: appear .9s cubic-bezier(.16,1,.3,1) both; }
+    @keyframes appear { from{opacity:0;transform:translateY(30px) scale(.97)} to{opacity:1;transform:translateY(0) scale(1)} }
+
+    /* ══ HEADER ══ */
+    .header { text-align: center; margin-bottom: 22px; }
+    .symbol { font-size: 2.5rem; display: block; line-height: 1; filter: drop-shadow(0 0 12px var(--violet)) drop-shadow(0 0 30px var(--violet-dim)); animation: symPulse 3s ease-in-out infinite alternate; letter-spacing: .15em; }
+    @keyframes symPulse { from{filter:drop-shadow(0 0 8px var(--violet)) drop-shadow(0 0 22px var(--violet-dim))} to{filter:drop-shadow(0 0 22px var(--violet)) drop-shadow(0 0 50px var(--violet-dim)) drop-shadow(0 0 8px var(--rose))} }
+    .brand-name { font-family: var(--deco); font-size: 2rem; font-weight: 700; letter-spacing: .18em; background: linear-gradient(135deg,#e2d4ff 0%,var(--violet) 50%,var(--rose) 100%); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; display:block; margin-top:6px; }
+    .tagline { font-size:.78rem; color:var(--muted); letter-spacing:.28em; text-transform:uppercase; margin-top:5px; font-weight:300; }
+
+    /* ══ GLASS CARD ══ */
+    .card { width:100%; background:var(--card-bg); backdrop-filter:blur(30px) saturate(150%); -webkit-backdrop-filter:blur(30px) saturate(150%); border:1px solid var(--border); border-radius:24px; padding:36px 36px 32px; box-shadow:0 0 0 1px rgba(255,255,255,.04) inset,0 0 70px rgba(100,50,200,.16),0 40px 90px rgba(0,0,0,.65); position:relative; overflow:hidden; }
+    .card::before { content:''; position:absolute; top:0; left:10%; right:10%; height:1px; background:linear-gradient(90deg,transparent,var(--violet),var(--rose),var(--violet),transparent); opacity:.8; }
+
+    /* ══ FIELD ══ */
+    .field-label { display:flex; align-items:center; gap:8px; font-size:.73rem; font-weight:700; letter-spacing:.18em; text-transform:uppercase; color:var(--violet); margin-bottom:10px; }
+    .field-label::before { content:''; display:inline-block; width:6px; height:6px; border-radius:50%; background:var(--violet); box-shadow:0 0 8px var(--violet); }
+
+    input[type="tel"], input[type="password"] {
+      width:100%; background:rgba(255,255,255,.04); border:1px solid var(--border); border-radius:12px;
+      padding:14px 18px; font-family:var(--mono); font-size:.98rem; font-weight:300; color:var(--text);
+      outline:none; direction:ltr; text-align:center; letter-spacing:.12em;
+      transition:border-color .25s,box-shadow .25s,background .25s; margin-bottom:8px;
+    }
+    input::placeholder { color:var(--muted); letter-spacing:.08em; }
+    input:focus { border-color:var(--violet); background:rgba(167,139,250,.06); box-shadow:0 0 0 3px rgba(167,139,250,.15),0 0 20px rgba(167,139,250,.1); }
+
+    .hint { display:block; font-size:.74rem; color:var(--muted); text-align:center; margin-bottom:26px; font-weight:300; }
+
+    /* ══ BUTTONS ══ */
+    .btn-primary { width:100%; padding:15px 20px; border:none; border-radius:12px; background:linear-gradient(135deg,#6d28d9 0%,#7c3aed 50%,#a855f7 100%); color:#fff; font-family:var(--sans); font-size:1rem; font-weight:900; letter-spacing:.04em; cursor:pointer; position:relative; overflow:hidden; transition:transform .15s,box-shadow .25s; box-shadow:0 0 30px rgba(124,58,237,.4),0 4px 20px rgba(0,0,0,.4); }
+    .btn-primary::after { content:''; position:absolute; inset:0; background:linear-gradient(135deg,transparent 0%,rgba(255,255,255,.13) 50%,transparent 100%); transform:translateX(-100%); transition:transform .5s; }
+    .btn-primary:hover { transform:translateY(-2px); box-shadow:0 0 50px rgba(124,58,237,.6),0 8px 30px rgba(0,0,0,.4); }
+    .btn-primary:hover::after { transform:translateX(100%); }
+    .btn-primary:active { transform:scale(.98); }
+    .btn-primary:disabled { background:rgba(100,80,160,.35); box-shadow:none; cursor:not-allowed; transform:none; }
+
+    .btn-ghost { background:rgba(167,139,250,.08); border:1px solid var(--border-glow); border-radius:10px; color:var(--violet); font-family:var(--sans); font-size:.85rem; font-weight:700; padding:10px 18px; cursor:pointer; transition:background .2s,transform .1s; }
+    .btn-ghost:hover { background:rgba(167,139,250,.18); transform:scale(1.03); }
+
+    .btn-danger { background:rgba(180,30,30,.2); border:1px solid rgba(252,165,165,.3); border-radius:8px; color:#fca5a5; font-family:var(--sans); font-size:.8rem; font-weight:700; padding:7px 14px; cursor:pointer; transition:background .2s; }
+    .btn-danger:hover { background:rgba(180,30,30,.4); }
+
+    .btn-text-row { display:flex; align-items:center; justify-content:center; gap:8px; }
+    .spinner { display:none; width:18px; height:18px; border:2.5px solid rgba(255,255,255,.2); border-top-color:#fff; border-radius:50%; animation:spin .7s linear infinite; margin:0 auto; }
+    @keyframes spin { to{transform:rotate(360deg)} }
+    .btn-primary.loading .btn-text-row { display:none; }
+    .btn-primary.loading .spinner { display:block; }
+
+    /* ══ DIVIDER ══ */
+    .divider { display:flex; align-items:center; gap:12px; margin:24px 0; color:var(--muted); font-size:.7rem; letter-spacing:.2em; text-transform:uppercase; }
+    .divider::before,.divider::after { content:''; flex:1; height:1px; background:linear-gradient(90deg,transparent,var(--border),transparent); }
+
+    /* ══ CODE RESULT ══ */
+    .result-box { display:none; text-align:center; animation:fadeUp .4s cubic-bezier(.16,1,.3,1) both; }
+    .result-box.visible { display:block; }
+    @keyframes fadeUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+    .code-wrap { background:rgba(167,139,250,.06); border:1px solid var(--border-glow); border-radius:16px; padding:22px 16px 16px; position:relative; }
+    .code-wrap::before { content:''; position:absolute; top:0; left:15%; right:15%; height:1px; background:linear-gradient(90deg,transparent,var(--violet),transparent); }
+    .code-text { font-family:var(--mono); font-size:2.4rem; font-weight:700; letter-spacing:.18em; background:linear-gradient(135deg,#e2d4ff,var(--violet),var(--rose)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; filter:drop-shadow(0 0 16px var(--violet)); display:block; line-height:1; margin-bottom:16px; }
+    .copy-btn { display:inline-flex; align-items:center; gap:6px; padding:8px 20px; font-family:var(--sans); font-size:.8rem; font-weight:700; background:rgba(167,139,250,.12); border:1px solid var(--border-glow); border-radius:8px; color:var(--violet); cursor:pointer; transition:background .2s,color .2s,transform .1s; letter-spacing:.06em; }
+    .copy-btn:hover { background:rgba(167,139,250,.22); color:#e2d4ff; transform:scale(1.04); }
+
+    /* ══ ERROR / SUCCESS ══ */
+    .error-box { display:none; margin-top:18px; background:rgba(180,30,30,.15); border:1px solid rgba(252,165,165,.25); border-radius:10px; padding:12px 16px; font-size:.85rem; color:var(--error); text-align:center; animation:fadeUp .3s ease both; }
+    .error-box.visible { display:block; }
+
+    /* ══ FOOTER ══ */
+    .footer { margin-top:18px; text-align:center; display:flex; align-items:center; justify-content:center; gap:8px; font-size:.73rem; color:var(--muted); }
+    .status-dot { width:7px; height:7px; border-radius:50%; background:var(--success); box-shadow:0 0 8px var(--success); animation:blink 2s ease-in-out infinite; }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.2} }
+
+    /* ══ ADMIN NAV ══ */
+    .admin-nav { display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; }
+    .admin-title { font-family:var(--deco); font-size:1.1rem; background:linear-gradient(135deg,#e2d4ff,var(--violet),var(--rose)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+
+    /* ══ SESSIONS TABLE ══ */
+    .sessions-list { display:flex; flex-direction:column; gap:10px; margin-top:4px; }
+
+    .session-card { background:rgba(167,139,250,.06); border:1px solid var(--border); border-radius:12px; padding:14px 16px; display:flex; align-items:center; justify-content:space-between; gap:12px; }
+    .session-info { display:flex; flex-direction:column; gap:3px; }
+    .session-num { font-family:var(--mono); font-size:.9rem; color:var(--text); direction:ltr; }
+    .session-status { font-size:.72rem; font-weight:700; letter-spacing:.1em; text-transform:uppercase; }
+    .session-status.connected { color:var(--success); }
+    .session-status.pending   { color:var(--rose); }
+    .session-status.reconnecting { color:#fbbf24; }
+
+    .empty-state { text-align:center; padding:30px 0; color:var(--muted); font-size:.88rem; }
+
+    /* ══ STATS ROW ══ */
+    .stats-row { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:20px; }
+    .stat-box { background:rgba(167,139,250,.06); border:1px solid var(--border); border-radius:12px; padding:14px; text-align:center; }
+    .stat-num { font-family:var(--mono); font-size:1.8rem; font-weight:700; color:var(--violet); display:block; }
+    .stat-lbl { font-size:.72rem; color:var(--muted); text-transform:uppercase; letter-spacing:.12em; }
+
+    /* ══ ADMIN LINK (subtle) ══ */
+    .admin-link { position:fixed; bottom:16px; left:50%; transform:translateX(-50%); z-index:20; font-size:.68rem; color:rgba(120,104,166,.4); cursor:pointer; letter-spacing:.1em; transition:color .3s; user-select:none; }
+    .admin-link:hover { color:var(--muted); }
+  </style>
+</head>
+<body>
+
+  <div class="bg-image"></div>
+  <div class="bg-veil"></div>
+  <div class="bg-glow"></div>
+  <div class="particles" id="particles"></div>
+
+  <!-- ══════════════════════════════════
+       PAGE 1 — USER (Public)
+  ══════════════════════════════════ -->
+  <div class="page active" id="page-user">
+    <div class="wrapper">
+
+      <div class="header">
+        <span class="symbol">𖤍 𖤍</span>
+        <span class="brand-name">Yoru</span>
+        <span class="tagline">WhatsApp Pairing · ليلي</span>
+      </div>
+
+      <div class="card">
+        <div class="field-label">رقم الهاتف</div>
+        <input id="phoneInput" type="tel" placeholder="966XXXXXXXXX" autocomplete="off" maxlength="15" dir="ltr" />
+        <span class="hint">أدخل رقمك مع رمز الدولة بدون +</span>
+
+        <button class="btn-primary" id="getBtn" onclick="getCode()">
+          <span class="btn-text-row">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            احصل على كود الإقران
+          </span>
+          <div class="spinner"></div>
+        </button>
+
+        <div class="result-box" id="resultBox">
+          <div class="divider">كود الإقران</div>
+          <div class="code-wrap">
+            <span class="code-text" id="codeDisplay">————</span>
+            <button class="copy-btn" onclick="copyCode()">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              نسخ الكود
+            </button>
+          </div>
+        </div>
+
+        <div class="error-box" id="errorBox"></div>
+      </div>
+
+      <div class="footer">
+        <div class="status-dot"></div>
+        <span>𖤍Yoru𖤍 Pairing Server · Online</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════
+       PAGE 2 — ADMIN LOGIN
+  ══════════════════════════════════ -->
+  <div class="page" id="page-login">
+    <div class="wrapper">
+
+      <div class="header">
+        <span class="symbol">𖤍</span>
+        <span class="brand-name">Admin</span>
+        <span class="tagline">Yoru · Control Panel</span>
+      </div>
+
+      <div class="card">
+        <div class="field-label">كلمة السر</div>
+        <input id="passInput" type="password" placeholder="••••••••" dir="ltr" />
+        <span class="hint">أدخل كلمة سر الأدمن</span>
+
+        <button class="btn-primary" id="loginBtn" onclick="adminLogin()">
+          <span class="btn-text-row">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+            دخول
+          </span>
+          <div class="spinner"></div>
+        </button>
+
+        <div class="error-box" id="loginError"></div>
+
+        <div style="margin-top:20px; text-align:center;">
+          <button class="btn-ghost" onclick="showPage('page-user')">← رجوع للصفحة الرئيسية</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════
+       PAGE 3 — ADMIN PANEL
+  ══════════════════════════════════ -->
+  <div class="page" id="page-admin">
+    <div class="wrapper" style="width:min(560px,96vw)">
+
+      <div class="header">
+        <span class="symbol">𖤍</span>
+        <span class="brand-name">Panel</span>
+        <span class="tagline">Yoru · Admin Dashboard</span>
+      </div>
+
+      <div class="card">
+
+        <div class="admin-nav">
+          <span class="admin-title">لوحة التحكم</span>
+          <div style="display:flex;gap:8px">
+            <button class="btn-ghost" onclick="loadSessions()" style="font-size:.75rem;padding:7px 12px">
+              🔄 تحديث
+            </button>
+            <button class="btn-ghost" onclick="adminLogout()" style="font-size:.75rem;padding:7px 12px;color:var(--rose)">
+              خروج
+            </button>
+          </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-row" id="statsRow">
+          <div class="stat-box">
+            <span class="stat-num" id="statTotal">—</span>
+            <span class="stat-lbl">إجمالي الجلسات</span>
+          </div>
+          <div class="stat-box">
+            <span class="stat-num" id="statConnected">—</span>
+            <span class="stat-lbl">متصل الآن</span>
+          </div>
+        </div>
+
+        <div class="divider">الجلسات النشطة</div>
+
+        <div class="sessions-list" id="sessionsList">
+          <div class="empty-state">جاري التحميل…</div>
+        </div>
+
+        <div style="margin-top:20px">
+          <button class="btn-danger" style="width:100%;padding:12px;font-size:.85rem" onclick="deleteAllSessions()">
+            🗑️ حذف جميع الجلسات
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- رابط الأدمن الخفي -->
+  <div class="admin-link" onclick="showPage('page-login')" title="Admin">⚙ admin</div>
+
+  <script>
+    /* ══ PARTICLES ══ */
+    const container = document.getElementById('particles');
+    const colors    = ['#a78bfa','#c4b5fd','#f9a8d4','#e2d4ff','#818cf8'];
+    for (let i = 0; i < 32; i++) {
+      const p   = document.createElement('div');
+      p.className = 'p';
+      const s   = Math.random() * 4 + 1.5;
+      const isp = Math.random() > .6;
+      p.style.cssText = `width:${s}px;height:${isp?s*2.2:s}px;left:${Math.random()*100}%;top:${75+Math.random()*25}%;background:${colors[Math.floor(Math.random()*colors.length)]};--dur:${6+Math.random()*12}s;--delay:${Math.random()*10}s;--op:${.25+Math.random()*.55};border-radius:${isp?'50% 50% 50% 0':'50%'};`;
+      container.appendChild(p);
+    }
+
+    /* ══ PAGE ROUTING ══ */
+    function showPage(id) {
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+    }
+
+    /* ══ USER — GET CODE ══ */
+    let lastCode = '';
+
+    async function getCode() {
+      const input  = document.getElementById('phoneInput');
+      const btn    = document.getElementById('getBtn');
+      const result = document.getElementById('resultBox');
+      const errBox = document.getElementById('errorBox');
+      const number = input.value.replace(/\D/g,'').trim();
+
+      if (!number || number.length < 7) { showErr(errBox,'⚠️ أدخل رقم هاتف صالح مع رمز الدولة'); return; }
+
+      result.classList.remove('visible');
+      errBox.classList.remove('visible');
+      btn.disabled = true; btn.classList.add('loading');
+
+      try {
+        const res  = await fetch(`/get-code?number=${encodeURIComponent(number)}`);
+        const data = await res.json();
+        if (!res.ok || data.error) { showErr(errBox, `❌ ${data.error||'فشل الاتصال'}`); return; }
+        lastCode = data.code;
+        document.getElementById('codeDisplay').textContent = data.code;
+        result.classList.add('visible');
+      } catch(_) {
+        showErr(errBox,'❌ تعذّر الاتصال بالخادم');
+      } finally {
+        btn.disabled = false; btn.classList.remove('loading');
+      }
+    }
+
+    async function copyCode() {
+      if (!lastCode) return;
+      try {
+        await navigator.clipboard.writeText(lastCode);
+        const b = document.querySelector('.copy-btn'), o = b.innerHTML;
+        b.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> تم النسخ ✓`;
+        b.style.color='#4ade80';
+        setTimeout(()=>{b.innerHTML=o;b.style.color='';},2000);
+      } catch(_){}
+    }
+
+    document.getElementById('phoneInput').addEventListener('keydown', e => { if(e.key==='Enter') getCode(); });
+
+    /* ══ ADMIN LOGIN ══ */
+    let adminToken = '';
+
+    async function adminLogin() {
+      const pass = document.getElementById('passInput').value.trim();
+      const btn  = document.getElementById('loginBtn');
+      const err  = document.getElementById('loginError');
+      err.classList.remove('visible');
+
+      if (!pass) { showErr(err,'⚠️ أدخل كلمة السر'); return; }
+
+      btn.disabled = true; btn.classList.add('loading');
+
+      try {
+        const res  = await fetch('/admin/login', {
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ password: pass })
+        });
+        const data = await res.json();
+
+        if (!res.ok || !data.token) { showErr(err,'❌ كلمة السر خاطئة'); return; }
+
+        adminToken = data.token;
+        document.getElementById('passInput').value = '';
+        showPage('page-admin');
+        loadSessions();
+      } catch(_) {
+        showErr(err,'❌ خطأ في الاتصال');
+      } finally {
+        btn.disabled = false; btn.classList.remove('loading');
+      }
+    }
+
+    function adminLogout() {
+      adminToken = '';
+      showPage('page-user');
+    }
+
+    document.getElementById('passInput').addEventListener('keydown', e => { if(e.key==='Enter') adminLogin(); });
+
+    /* ══ ADMIN — SESSIONS ══ */
+    async function loadSessions() {
+      const list = document.getElementById('sessionsList');
+      const statTotal     = document.getElementById('statTotal');
+      const statConnected = document.getElementById('statConnected');
+      list.innerHTML = '<div class="empty-state">جاري التحميل…</div>';
+
+      try {
+        const res  = await fetch('/admin/sessions', {
+          headers: { 'x-admin-token': adminToken }
+        });
+        if (res.status === 401) { adminLogout(); return; }
+        const data = await res.json();
+
+        statTotal.textContent     = data.sessions.length;
+        statConnected.textContent = data.sessions.filter(s=>s.status==='connected').length;
+
+        if (!data.sessions.length) {
+          list.innerHTML = '<div class="empty-state">لا توجد جلسات نشطة 🌙</div>';
+          return;
+        }
+
+        list.innerHTML = '';
+        data.sessions.forEach(s => {
+          const card = document.createElement('div');
+          card.className = 'session-card';
+          card.innerHTML = `
+            <div class="session-info">
+              <span class="session-num">${s.number}</span>
+              <span class="session-status ${s.status}">${statusLabel(s.status)}</span>
+            </div>
+            <button class="btn-danger" onclick="deleteSession('${s.number}', this)">🗑 حذف</button>
+          `;
+          list.appendChild(card);
+        });
+      } catch(_) {
+        list.innerHTML = '<div class="empty-state">❌ فشل تحميل الجلسات</div>';
+      }
+    }
+
+    function statusLabel(s) {
+      return { connected:'● متصل', pending:'◌ في الانتظار', reconnecting:'↺ إعادة اتصال' }[s] || s;
+    }
+
+    async function deleteSession(number, btn) {
+      btn.disabled = true; btn.textContent = '…';
+      try {
+        await fetch(`/admin/session?number=${encodeURIComponent(number)}`, {
+          method:'DELETE',
+          headers:{ 'x-admin-token': adminToken }
+        });
+        loadSessions();
+      } catch(_) { btn.disabled=false; btn.textContent='🗑 حذف'; }
+    }
+
+    async function deleteAllSessions() {
+      if (!confirm('⚠️ هتحذف كل الجلسات؟')) return;
+      try {
+        await fetch('/admin/sessions/all', {
+          method:'DELETE',
+          headers:{ 'x-admin-token': adminToken }
+        });
+        loadSessions();
+      } catch(_){}
+    }
+
+    /* ══ HELPERS ══ */
+    function showErr(box, msg) { box.textContent = msg; box.classList.add('visible'); }
+  </script>
+</body>
+</html>
