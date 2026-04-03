@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yoru - Instagram Downloader</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: linear-gradient(135deg, #0a0a0a, #1a1a1a);
+            font-family: 'Tajawal', sans-serif;
+            color: white;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container { max-width: 800px; margin: 0 auto; }
+        .header { text-align: center; margin-bottom: 30px; }
+        .header h1 { color: #d62976; font-size: 2rem; }
+        .header p { color: #aaa; }
+        .input-box {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+        .url-input {
+            flex: 1;
+            padding: 14px 20px;
+            border: none;
+            border-radius: 50px;
+            background: #2a2a2a;
+            color: white;
+            font-size: 16px;
+            outline: none;
+        }
+        .download-btn {
+            padding: 14px 30px;
+            background: linear-gradient(135deg, #d62976, #c13584);
+            border: none;
+            border-radius: 50px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .download-btn:hover { transform: scale(1.02); }
+        .result {
+            margin-top: 20px;
+            text-align: center;
+            display: none;
+        }
+        .result.show { display: block; }
+        .video-player {
+            width: 100%;
+            max-height: 400px;
+            border-radius: 16px;
+            margin-top: 15px;
+        }
+        .direct-link {
+            display: inline-block;
+            margin-top: 15px;
+            padding: 10px 20px;
+            background: #d62976;
+            border-radius: 30px;
+            color: white;
+            text-decoration: none;
+        }
+        .loading {
+            text-align: center;
+            padding: 40px;
+            display: none;
+        }
+        .error {
+            background: rgba(255,0,0,0.2);
+            padding: 12px;
+            border-radius: 12px;
+            color: #ff6666;
+            margin-top: 15px;
+            display: none;
+        }
+        .back-home {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #d62976;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <a href="/" class="back-home">← العودة للرئيسية</a>
+    <div class="header">
+        <h1>📸 Instagram Downloader</h1>
+        <p>حمّل فيديوهات وصور إنستجرام (رابط فقط)</p>
+    </div>
+    <div class="input-box">
+        <input type="text" id="instagramUrl" class="url-input" placeholder="الصق رابط منشور إنستجرام...">
+        <button id="downloadBtn" class="download-btn">📥 تحميل</button>
+    </div>
+    <div id="loading" class="loading">⏳ جاري المعالجة...</div>
+    <div id="result" class="result"></div>
+    <div id="error" class="error"></div>
+</div>
+
+<script>
+    const API_KEY = localStorage.getItem('api_key') || 'test-key-123';
+
+    async function download() {
+        const url = document.getElementById('instagramUrl').value.trim();
+        if (!url) return;
+        
+        document.getElementById('loading').style.display = 'block';
+        document.getElementById('result').innerHTML = '';
+        document.getElementById('result').classList.remove('show');
+        document.getElementById('error').style.display = 'none';
+        
+        try {
+            const res = await fetch(`/api/instagram/download?url=${encodeURIComponent(url)}`, {
+                headers: { 'x-api-key': API_KEY }
+            });
+            const data = await res.json();
+            if (!data.success) throw new Error(data.error);
+            
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = `
+                <video class="video-player" src="${data.downloadUrl}" controls></video>
+                <a href="${data.downloadUrl}" class="direct-link" download>📥 تحميل الفيديو</a>
+            `;
+            resultDiv.classList.add('show');
+        } catch (err) {
+            document.getElementById('error').style.display = 'block';
+            document.getElementById('error').innerHTML = '❌ ' + err.message;
+        } finally {
+            document.getElementById('loading').style.display = 'none';
+        }
+    }
+    
+    document.getElementById('downloadBtn').addEventListener('click', download);
+    document.getElementById('instagramUrl').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') download();
+    });
+</script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9e63c969cfbc137e',t:'MTc3NTE3NDM2MA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>

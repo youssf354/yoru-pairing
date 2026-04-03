@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>YouTube Downloader - Yoru</title>
+    <style>
+        body {
+            background: #0a0a0a;
+            color: white;
+            font-family: 'Tajawal', sans-serif;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+        }
+        .search-box {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .search-input {
+            flex: 1;
+            padding: 12px;
+            border-radius: 30px;
+            border: none;
+            background: #222;
+            color: white;
+        }
+        .search-btn {
+            padding: 12px 24px;
+            background: #ff0000;
+            border: none;
+            border-radius: 30px;
+            color: white;
+            cursor: pointer;
+        }
+        .results {
+            display: grid;
+            gap: 20px;
+        }
+        .video-card {
+            background: #1a1a1a;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        .video-thumb {
+            width: 100%;
+            aspect-ratio: 16/9;
+            object-fit: cover;
+        }
+        .video-info {
+            padding: 12px;
+        }
+        .video-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .video-channel {
+            color: #aaa;
+            font-size: 12px;
+            margin-bottom: 10px;
+        }
+        .quality-btns {
+            display: flex;
+            gap: 8px;
+        }
+        .q-btn {
+            flex: 1;
+            padding: 8px;
+            background: #333;
+            border: none;
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+        }
+        .q-btn.video { background: #e74c3c; }
+        .q-btn.audio { background: #2c3e50; }
+        .q-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            background: #222;
+            padding: 12px;
+            border-radius: 10px;
+            text-align: center;
+            display: none;
+            z-index: 1000;
+        }
+        .error { background: #c0392b; }
+        .success { background: #27ae60; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>📺 YouTube Downloader</h1>
+    <div class="search-box">
+        <input type="text" id="searchInput" class="search-input" placeholder="ابحث عن فيديو...">
+        <button id="searchBtn" class="search-btn">بحث</button>
+    </div>
+    <div id="results" class="results"></div>
+</div>
+<div id="toast" class="toast"></div>
+
+<script>
+    const API_KEY = localStorage.getItem('api_key') || 'test-key-123';
+    let activeDownloads = {}; // لتتبع التحميلات النشطة
+
+    function showToast(msg, type = '') {
+        const toast = document.getElementById('toast');
+        toast.textContent = msg;
+        toast.className = 'toast ' + type;
+        toast.style.display = 'block';
+        setTimeout(() => toast.style.display = 'none', 5000);
+    }
+
+    async function search() {
+        const query = document.getElementById('searchInput').value.trim();
+        if (!query) return;
+        showToast('🔍 جاري البحث...');
+        try {
+            const res = await fetch(`/api/youtube/search?q=${encodeURIComponent(query)}`, {
+                headers: { 'x-api-key': API_KEY }
+            });
+            const data = await res.json();
+            if (!data.success || !data.videos?.length) throw new Error(data.error || 'لا توجد نتائج');
+            renderResults(data.videos);
+        } catch (err) {
+            console.error(err);
+            showToast('❌ ' + err.message, 'error');
+        }
+    }
+
+    function renderResults(videos) {
+        const container = document.getElementById('results');
+        container.innerHTML = '';
+        videos.forEach(v => {
+            const card = document.createElement('div');
+            card.className = 'video-card';
+            card.innerHTML = `
+                <img class="video-thumb" src="${v.thumbnail}" onerror="this.src='https://img.youtube.com/vi/${v.id}/mqdefault.jpg'">
+                <div class="video-info">
+                    <div class="video-title">${escapeHtml(v.title)}</div>
+                    <div class="video-channel">📺 ${escapeHtml(v.channel)}</div>
+                    <div class="quality-btns">
+                        <button class="q-btn video" data-id="${v.id}" data-quality="720">🎬 720p</button>
+                        <button class="q-btn video" data-id="${v.id}" data-quality="360">🎬 360p</button>
+                        <button class="q-btn audio" data-id="${v.id}" data-quality="mp3">🎵 MP3</button>
+                    </div>
+                </div>
+            `;
+            container.appendChild(card);
+        });
+        // إضافة مستمعي الأزرار
+        document.querySelectorAll('.q-btn').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                const id = btn.dataset.id;
+                const quality = btn.dataset.quality;
+                await downloadVideo(id, quality, btn);
+            });
+        });
+    }
+
+    async function downloadVideo(videoId, quality, btn) {
+        const url = `https://www.youtube.com/watch?v=${videoId}`;
+        const originalText = btn.innerText;
+        btn.disabled = true;
+        btn.innerText = '⏳ جاري...';
+        showToast(`⏳ بدء التحميل (${quality === 'mp3' ? 'صوت' : 'فيديو ' + quality})...`);
+
+        try {
+            // 1. طلب رابط التحميل من السيرفر
+            const res = await fetch(`/api/youtube/download?url=${encodeURIComponent(url)}&format=${quality}`, {
+                headers: { 'x-api-key': API_KEY }
+            });
+            const data = await res.json();
+            if (!data.success || !data.downloadUrl) throw new Error(data.error || 'لم يتم استلام رابط التحميل');
+
+            // 2. فتح رابط التحميل مباشرة (أسرع وأسهل)
+            window.open(data.downloadUrl, '_blank');
+            showToast(`✅ بدأ التحميل!`, 'success');
+            btn.innerText = '✅ تم';
+
+        } catch (err) {
+            console.error('Download error:', err);
+            showToast(`❌ فشل التحميل: ${err.message}`, 'error');
+            btn.innerText = originalText;
+        } finally {
+            setTimeout(() => { btn.disabled = false; }, 3000);
+        }
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+
+    document.getElementById('searchBtn').addEventListener('click', search);
+    document.getElementById('searchInput').addEventListener('keypress', e => { if (e.key === 'Enter') search(); });
+</script>
+</body>
+</html>

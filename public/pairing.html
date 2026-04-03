@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yoru - WhatsApp Pairing</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: linear-gradient(135deg, #0a0a0a, #1a1a1a);
+            font-family: 'Tajawal', sans-serif;
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .container {
+            max-width: 500px;
+            width: 100%;
+            background: rgba(20,20,40,0.7);
+            backdrop-filter: blur(10px);
+            border-radius: 32px;
+            padding: 30px;
+            border: 1px solid rgba(157,111,255,0.3);
+            box-shadow: 0 0 30px rgba(157,111,255,0.1);
+        }
+        h1 {
+            text-align: center;
+            font-family: 'Cinzel Decorative', cursive;
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #a78bfa, #f9a8d4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .sub {
+            text-align: center;
+            color: #aaa;
+            margin-bottom: 30px;
+            font-size: 0.8rem;
+        }
+        .input-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #c084fc;
+        }
+        input {
+            width: 100%;
+            padding: 14px;
+            border-radius: 28px;
+            border: 1px solid #333;
+            background: #0f0f1a;
+            color: white;
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.3s;
+            text-align: center;
+            letter-spacing: 1px;
+        }
+        input:focus {
+            border-color: #a78bfa;
+            box-shadow: 0 0 12px rgba(167,139,250,0.3);
+        }
+        button {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #7c3aed, #a855f7);
+            border: none;
+            border-radius: 28px;
+            color: white;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(124,58,237,0.4);
+        }
+        button:disabled {
+            opacity: 0.6;
+            transform: none;
+            cursor: not-allowed;
+        }
+        .code-box {
+            margin-top: 25px;
+            background: #0a0a12;
+            border-radius: 20px;
+            padding: 20px;
+            text-align: center;
+            border: 1px dashed #a78bfa;
+            display: none;
+        }
+        .code-box.show {
+            display: block;
+            animation: fadeIn 0.4s ease;
+        }
+        .code {
+            font-family: monospace;
+            font-size: 2rem;
+            letter-spacing: 5px;
+            background: #000;
+            padding: 12px;
+            border-radius: 16px;
+            margin: 15px 0;
+            color: #f0f;
+            word-break: break-all;
+        }
+        .copy-btn {
+            background: #2d2d44;
+            padding: 8px 20px;
+            width: auto;
+            display: inline-block;
+            margin-top: 10px;
+        }
+        .loader {
+            display: none;
+            text-align: center;
+            margin-top: 15px;
+        }
+        .loader.show {
+            display: block;
+        }
+        .spinner {
+            width: 30px;
+            height: 30px;
+            border: 3px solid rgba(167,139,250,0.2);
+            border-top-color: #a78bfa;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .back-link {
+            display: inline-block;
+            margin-top: 20px;
+            color: #aaa;
+            text-decoration: none;
+            font-size: 0.8rem;
+        }
+        .back-link:hover {
+            color: #a78bfa;
+        }
+        .error-msg {
+            color: #f87171;
+            background: rgba(248,113,113,0.1);
+            padding: 10px;
+            border-radius: 16px;
+            margin-top: 15px;
+            text-align: center;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>🔗 Pairing Code</h1>
+    <div class="sub">اربط واتساب البوت برقمك</div>
+
+    <div class="input-group">
+        <label>📱 رقم الهاتف (مع رمز الدولة)</label>
+        <input type="tel" id="phone" placeholder="مثال: 201002435496" dir="ltr">
+    </div>
+
+    <button id="getCodeBtn">✨ احصل على كود الإقران</button>
+
+    <div class="loader" id="loader">
+        <div class="spinner"></div>
+        <p style="margin-top: 10px; color:#aaa;">جاري تجهيز الكود...</p>
+    </div>
+
+    <div class="code-box" id="codeBox">
+        <div style="font-size: 0.8rem; color:#ccc;">كود الإقران (أدخله في واتساب)</div>
+        <div class="code" id="codeDisplay"></div>
+        <button id="copyBtn" class="copy-btn">📋 نسخ الكود</button>
+        <div style="font-size: 0.7rem; margin-top: 10px; color:#aaa;">⏳ صلاحية الكود 5 دقائق</div>
+    </div>
+
+    <div class="error-msg" id="errorMsg"></div>
+
+    <a href="/" class="back-link">← العودة للرئيسية</a>
+</div>
+
+<script>
+    const phoneInput = document.getElementById('phone');
+    const getBtn = document.getElementById('getCodeBtn');
+    const loader = document.getElementById('loader');
+    const codeBox = document.getElementById('codeBox');
+    const codeDisplay = document.getElementById('codeDisplay');
+    const copyBtn = document.getElementById('copyBtn');
+    const errorMsg = document.getElementById('errorMsg');
+
+    function hideError() {
+        errorMsg.style.display = 'none';
+        errorMsg.innerText = '';
+    }
+    function showError(msg) {
+        errorMsg.innerText = msg;
+        errorMsg.style.display = 'block';
+        codeBox.classList.remove('show');
+    }
+
+    getBtn.addEventListener('click', async () => {
+        let number = phoneInput.value.trim();
+        if (!number) {
+            showError('❌ الرجاء إدخال رقم الهاتف');
+            return;
+        }
+        number = number.replace(/\D/g, '');
+        if (number.length < 7) {
+            showError('❌ رقم غير صالح (يجب أن يحتوي على 7 أرقام على الأقل)');
+            return;
+        }
+
+        hideError();
+        codeBox.classList.remove('show');
+        loader.classList.add('show');
+        getBtn.disabled = true;
+
+        try {
+            const res = await fetch(`/get-code?number=${encodeURIComponent(number)}`);
+            const data = await res.json();
+            if (!res.ok || data.error) throw new Error(data.error || 'فشل الحصول على الكود');
+            codeDisplay.innerText = data.code;
+            codeBox.classList.add('show');
+        } catch (err) {
+            showError(`❌ ${err.message}`);
+        } finally {
+            loader.classList.remove('show');
+            getBtn.disabled = false;
+        }
+    });
+
+    copyBtn.addEventListener('click', () => {
+        const code = codeDisplay.innerText;
+        if (!code || code === '————') return;
+        navigator.clipboard.writeText(code).then(() => {
+            const original = copyBtn.innerText;
+            copyBtn.innerText = '✅ تم النسخ!';
+            setTimeout(() => copyBtn.innerText = original, 2000);
+        });
+    });
+</script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9e63af6ecb12d0aa',t:'MTc3NTE3MzI5Ng=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>

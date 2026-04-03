@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>Yoru - Facebook & Instagram Downloader</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: linear-gradient(135deg, #0a0a0a, #1a1a1a);
+            font-family: 'Tajawal', sans-serif;
+            color: white;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container { max-width: 600px; margin: 0 auto; }
+        .header { text-align: center; margin-bottom: 30px; }
+        .header h1 { background: linear-gradient(135deg, #4267B2, #E4405F); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .input-box { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+        .url-input {
+            flex: 1;
+            padding: 14px;
+            border-radius: 30px;
+            border: none;
+            background: #2a2a2a;
+            color: white;
+        }
+        .download-btn {
+            padding: 14px 25px;
+            background: linear-gradient(135deg, #4267B2, #E4405F);
+            border: none;
+            border-radius: 30px;
+            color: white;
+            cursor: pointer;
+        }
+        .result { margin-top: 20px; display: none; text-align: center; }
+        .video-player { width: 100%; border-radius: 16px; margin-top: 10px; }
+        .direct-link {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 10px 20px;
+            background: #27ae60;
+            border-radius: 30px;
+            color: white;
+            text-decoration: none;
+        }
+        .loading { text-align: center; padding: 30px; display: none; }
+        .error { background: rgba(255,0,0,0.2); padding: 12px; border-radius: 12px; color: #ff6666; margin-top: 15px; display: none; }
+        .back-home { display: inline-block; margin-bottom: 20px; color: #aaa; text-decoration: none; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <a href="/" class="back-home">← العودة للرئيسية</a>
+    <div class="header">
+        <h1>📘📸 Facebook & Instagram</h1>
+        <p>حمّل فيديوهات من فيسبوك وإنستجرام</p>
+    </div>
+    <div class="input-box">
+        <input type="text" id="socialUrl" class="url-input" placeholder="الصق رابط فيسبوك أو إنستجرام...">
+        <button id="downloadBtn" class="download-btn">📥 تحميل</button>
+    </div>
+    <div id="loading" class="loading">⏳ جاري المعالجة...</div>
+    <div id="result" class="result"></div>
+    <div id="error" class="error"></div>
+</div>
+
+<script>
+    const API_KEY = localStorage.getItem('api_key') || 'test-key-123';
+
+    async function download() {
+        const url = document.getElementById('socialUrl').value.trim();
+        if (!url) return;
+        
+        document.getElementById('loading').style.display = 'block';
+        document.getElementById('result').style.display = 'none';
+        document.getElementById('error').style.display = 'none';
+        
+        try {
+            const res = await fetch(`/api/social/download?url=${encodeURIComponent(url)}`, {
+                headers: { 'x-api-key': API_KEY }
+            });
+            const data = await res.json();
+            if (!data.success) throw new Error(data.error);
+            
+            document.getElementById('result').innerHTML = `
+                <video class="video-player" controls>
+                    <source src="${data.downloadUrl}" type="video/mp4">
+                </video>
+                <a href="${data.downloadUrl}" class="direct-link" download>📥 حفظ الفيديو</a>
+            `;
+            document.getElementById('result').style.display = 'block';
+        } catch (err) {
+            document.getElementById('error').style.display = 'block';
+            document.getElementById('error').innerHTML = '❌ ' + err.message;
+        } finally {
+            document.getElementById('loading').style.display = 'none';
+        }
+    }
+    
+    document.getElementById('downloadBtn').addEventListener('click', download);
+    document.getElementById('socialUrl').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') download();
+    });
+</script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9e644f1d59f98825',t:'MTc3NTE3OTgzNw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>

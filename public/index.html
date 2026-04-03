@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>𖤍 Yoru · Media Hub</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Tajawal:wght@300;400;700;900&family=Noto+Serif+JP:wght@200;400&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg:       #04010e;
+      --violet:   #9d6fff;
+      --violet2:  #c084fc;
+      --rose:     #f472b6;
+      --gold:     #fbbf24;
+      --text:     #e8e0ff;
+      --muted:    #6b5f8a;
+      --card-bg:  rgba(15, 8, 35, 0.7);
+      --glow:     rgba(157, 111, 255, 0.35);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Tajawal', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── Animated Background ── */
+    .bg-layer {
+      position: fixed; inset: 0; z-index: 0;
+      background: url('https://file.garden/aauvg01sjleV_ic1/9.jpg') center/cover no-repeat;
+      filter: brightness(0.18) saturate(1.4);
+    }
+    .bg-noise {
+      position: fixed; inset: 0; z-index: 1; opacity: 0.04;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+    }
+    .bg-glow {
+      position: fixed; inset: 0; z-index: 2;
+      background:
+        radial-gradient(ellipse 80% 50% at 20% 10%, rgba(120,60,255,0.12) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 40% at 80% 90%, rgba(244,114,182,0.08) 0%, transparent 60%),
+        radial-gradient(ellipse 100% 80% at 50% 50%, rgba(4,1,14,0.6) 0%, transparent 100%);
+    }
+
+    /* ── Floating Particles ── */
+    .particles { position: fixed; inset: 0; z-index: 3; pointer-events: none; overflow: hidden; }
+    .particle {
+      position: absolute;
+      width: 2px; height: 2px;
+      background: var(--violet);
+      border-radius: 50%;
+      opacity: 0;
+      animation: float-up linear infinite;
+    }
+    @keyframes float-up {
+      0%   { transform: translateY(100vh) translateX(0); opacity: 0; }
+      10%  { opacity: 0.6; }
+      90%  { opacity: 0.3; }
+      100% { transform: translateY(-20px) translateX(30px); opacity: 0; }
+    }
+
+    /* ── Main Wrapper ── */
+    .wrapper {
+      position: relative; z-index: 10;
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 50px 20px 60px;
+    }
+
+    /* ── Header ── */
+    .header {
+      text-align: center;
+      margin-bottom: 50px;
+      animation: fade-down 0.8s ease both;
+    }
+    @keyframes fade-down {
+      from { opacity: 0; transform: translateY(-24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .header-symbol {
+      font-size: 3.5rem;
+      display: block;
+      filter: drop-shadow(0 0 20px rgba(157,111,255,0.7));
+      animation: pulse-symbol 3s ease-in-out infinite;
+    }
+    @keyframes pulse-symbol {
+      0%, 100% { filter: drop-shadow(0 0 20px rgba(157,111,255,0.7)); }
+      50%       { filter: drop-shadow(0 0 40px rgba(192,132,252,0.9)); }
+    }
+
+    .brand {
+      font-family: 'Cinzel Decorative', cursive;
+      font-size: clamp(1.6rem, 5vw, 2.4rem);
+      letter-spacing: 0.04em;
+      background: linear-gradient(135deg, #e2d4ff 0%, #a78bfa 40%, #f9a8d4 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-top: 8px;
+      line-height: 1.2;
+    }
+
+    .tagline {
+      font-size: 0.78rem;
+      color: var(--muted);
+      margin-top: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .divider {
+      width: 120px;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--violet), transparent);
+      margin: 20px auto 0;
+      opacity: 0.5;
+    }
+
+    /* ── Developer Card ── */
+    .dev-card {
+      position: relative;
+      background: var(--card-bg);
+      backdrop-filter: blur(24px);
+      border: 1px solid rgba(157,111,255,0.2);
+      border-radius: 28px;
+      padding: 28px 24px;
+      margin-bottom: 36px;
+      text-align: center;
+      overflow: hidden;
+      animation: fade-up 0.9s ease 0.15s both;
+    }
+    .dev-card::before {
+      content: '';
+      position: absolute;
+      top: -60px; left: 50%;
+      transform: translateX(-50%);
+      width: 200px; height: 200px;
+      background: radial-gradient(circle, rgba(157,111,255,0.12), transparent 70%);
+      pointer-events: none;
+    }
+    .dev-card::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 28px;
+      padding: 1px;
+      background: linear-gradient(135deg, rgba(157,111,255,0.4), transparent 50%, rgba(244,114,182,0.2));
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      pointer-events: none;
+    }
+
+    .dev-avatar {
+      width: 64px; height: 64px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #7c3aed, #db2777);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.8rem;
+      margin: 0 auto 14px;
+      box-shadow: 0 0 30px rgba(157,111,255,0.4);
+    }
+
+    .dev-name {
+      font-family: 'Cinzel Decorative', cursive;
+      font-size: 1.15rem;
+      color: var(--violet2);
+      margin-bottom: 6px;
+    }
+
+    .dev-role {
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-bottom: 18px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    .dev-links {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .dev-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      background: rgba(157,111,255,0.08);
+      padding: 9px 18px;
+      border-radius: 40px;
+      text-decoration: none;
+      color: var(--text);
+      font-size: 0.82rem;
+      border: 1px solid rgba(157,111,255,0.2);
+      transition: all 0.3s ease;
+      font-weight: 500;
+    }
+    .dev-link:hover {
+      background: rgba(157,111,255,0.2);
+      border-color: var(--violet);
+      box-shadow: 0 0 20px rgba(157,111,255,0.25);
+      transform: translateY(-2px);
+    }
+
+    /* ── Section Label ── */
+    .section-label {
+      font-size: 0.7rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--muted);
+      text-align: center;
+      margin-bottom: 18px;
+      animation: fade-up 0.9s ease 0.2s both;
+    }
+
+    /* ── Platform Grid ── */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 14px;
+      margin-bottom: 36px;
+    }
+
+    .card {
+      position: relative;
+      background: var(--card-bg);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(157,111,255,0.12);
+      border-radius: 22px;
+      padding: 24px 12px 20px;
+      text-align: center;
+      text-decoration: none;
+      color: var(--text);
+      transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+      overflow: hidden;
+      animation: fade-up 0.7s ease both;
+    }
+    .card:hover {
+      transform: translateY(-6px) scale(1.03);
+      border-color: var(--violet);
+      box-shadow: 0 12px 40px rgba(157,111,255,0.25), 0 0 0 1px rgba(157,111,255,0.1);
+    }
+    .card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 50% 0%, rgba(157,111,255,0.08), transparent 70%);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .card:hover::before { opacity: 1; }
+
+    .card-glow {
+      position: absolute;
+      top: -20px; left: 50%;
+      transform: translateX(-50%);
+      width: 80px; height: 80px;
+      border-radius: 50%;
+      opacity: 0;
+      filter: blur(20px);
+      transition: opacity 0.4s;
+    }
+    .card:hover .card-glow { opacity: 0.6; }
+
+    .card-icon {
+      font-size: 2.2rem;
+      display: block;
+      margin-bottom: 10px;
+      transition: transform 0.3s ease;
+    }
+    .card:hover .card-icon { transform: scale(1.15) rotate(-5deg); }
+
+    .card-title {
+      font-size: 0.88rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+
+    .card-badge {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      font-size: 0.58rem;
+      background: rgba(157,111,255,0.2);
+      color: var(--violet2);
+      padding: 2px 7px;
+      border-radius: 20px;
+      border: 1px solid rgba(157,111,255,0.3);
+      letter-spacing: 0.06em;
+    }
+
+    /* Unique glow per card */
+    .card[data-color="pink"]   { --c: rgba(244,114,182,0.4); }
+    .card[data-color="red"]    { --c: rgba(239,68,68,0.4); }
+    .card[data-color="rose"]   { --c: rgba(251,113,133,0.4); }
+    .card[data-color="blue"]   { --c: rgba(96,165,250,0.4); }
+    .card[data-color="orange"] { --c: rgba(251,146,60,0.4); }
+    .card[data-color="green"]  { --c: rgba(52,211,153,0.4); }
+    .card[data-color="violet"] { --c: rgba(157,111,255,0.5); }
+    .card-glow { background: var(--c, rgba(157,111,255,0.4)); }
+
+    /* Stagger animation */
+    .card:nth-child(1) { animation-delay: 0.25s; }
+    .card:nth-child(2) { animation-delay: 0.32s; }
+    .card:nth-child(3) { animation-delay: 0.39s; }
+    .card:nth-child(4) { animation-delay: 0.46s; }
+    .card:nth-child(5) { animation-delay: 0.53s; }
+    .card:nth-child(6) { animation-delay: 0.60s; }
+    .card:nth-child(7) { animation-delay: 0.67s; }
+
+    @keyframes fade-up {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── Stats Strip ── */
+    .stats {
+      display: flex;
+      justify-content: center;
+      gap: 0;
+      background: var(--card-bg);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(157,111,255,0.15);
+      border-radius: 20px;
+      overflow: hidden;
+      margin-bottom: 36px;
+      animation: fade-up 0.9s ease 0.7s both;
+    }
+    .stat {
+      flex: 1;
+      padding: 18px 10px;
+      text-align: center;
+      border-left: 1px solid rgba(157,111,255,0.1);
+    }
+    .stat:last-child { border-left: none; }
+    .stat-num {
+      font-family: 'Cinzel Decorative', cursive;
+      font-size: 1.3rem;
+      color: var(--violet2);
+      display: block;
+    }
+    .stat-label {
+      font-size: 0.65rem;
+      color: var(--muted);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-top: 3px;
+      display: block;
+    }
+
+    /* ── Footer ── */
+    .footer {
+      text-align: center;
+      margin-top: 40px;
+      padding-top: 24px;
+      border-top: 1px solid rgba(157,111,255,0.1);
+      animation: fade-up 0.9s ease 0.8s both;
+    }
+    .footer-symbol {
+      font-size: 1.6rem;
+      opacity: 0.4;
+      display: block;
+      margin-bottom: 8px;
+    }
+    .footer-text {
+      font-size: 0.68rem;
+      color: var(--muted);
+      letter-spacing: 0.12em;
+    }
+    .footer-year {
+      color: var(--violet);
+      opacity: 0.7;
+    }
+
+    /* ── Scrollbar ── */
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--violet-dim); border-radius: 4px; }
+
+    /* ── Responsive ── */
+    @media (max-width: 400px) {
+      .grid { grid-template-columns: repeat(2, 1fr); }
+      .stats { flex-wrap: wrap; }
+      .stat { min-width: 33%; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Background Layers -->
+  <div class="bg-layer"></div>
+  <div class="bg-noise"></div>
+  <div class="bg-glow"></div>
+
+  <!-- Floating Particles -->
+  <div class="particles" id="particles"></div>
+
+  <div class="wrapper">
+
+    <!-- Header -->
+    <div class="header">
+      <span class="header-symbol">𖤍</span>
+      <div class="brand">Yoru Media Hub</div>
+      <p class="tagline">تحميل من جميع المنصات · أدوات المطورين</p>
+      <div class="divider"></div>
+    </div>
+
+    <!-- Developer Card -->
+    <div class="dev-card">
+      <div class="dev-avatar">𖤍</div>
+      <div class="dev-name">Yoru Bot</div>
+      <div class="dev-role">Developer · ༺youssf༻</div>
+      <div class="dev-links">
+        <a href="https://wa.me/201002435496" target="_blank" class="dev-link">
+          <span>📱</span> +20 10 02435496
+        </a>
+        <a href="https://whatsapp.com/channel/0029VbCJtCILI8YQz9VFQQ2w" target="_blank" class="dev-link">
+          <span>📢</span> القناة الرسمية
+        </a>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats">
+      <div class="stat">
+        <span class="stat-num">7+</span>
+        <span class="stat-label">منصة</span>
+      </div>
+      <div class="stat">
+        <span class="stat-num">HD</span>
+        <span class="stat-label">جودة</span>
+      </div>
+      <div class="stat">
+        <span class="stat-num">24/7</span>
+        <span class="stat-label">متاح</span>
+      </div>
+      <div class="stat">
+        <span class="stat-num">🔥</span>
+        <span class="stat-label">مجاني</span>
+      </div>
+    </div>
+
+    <!-- Platform Grid -->
+    <p class="section-label">اختر المنصة</p>
+    <div class="grid">
+
+      <a href="/tiktok" class="card" data-color="pink">
+        <div class="card-glow"></div>
+        <span class="card-icon">🎵</span>
+        <span class="card-title">تيك توك</span>
+      </a>
+
+      <a href="/youtube" class="card" data-color="red">
+        <div class="card-glow"></div>
+        <span class="card-badge">HD</span>
+        <span class="card-icon">📺</span>
+        <span class="card-title">يوتيوب</span>
+      </a>
+
+      <a href="/instagram" class="card" data-color="rose">
+        <div class="card-glow"></div>
+        <span class="card-icon">📸</span>
+        <span class="card-title">إنستجرام</span>
+      </a>
+
+      <a href="/facebook" class="card" data-color="blue">
+        <div class="card-glow"></div>
+        <span class="card-icon">📘</span>
+        <span class="card-title">فيسبوك</span>
+      </a>
+
+      <a href="/soundcloud" class="card" data-color="orange">
+        <div class="card-glow"></div>
+        <span class="card-icon">🎧</span>
+        <span class="card-title">ساوند كلاود</span>
+      </a>
+
+      <a href="/spotify" class="card" data-color="green">
+        <div class="card-glow"></div>
+        <span class="card-icon">🎵</span>
+        <span class="card-title">سبوتيفاي</span>
+      </a>
+
+      <a href="/pairing" class="card" data-color="violet">
+        <div class="card-glow"></div>
+        <span class="card-badge">جديد</span>
+        <span class="card-icon">🔗</span>
+        <span class="card-title">إقران واتساب</span>
+      </a>
+
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      <span class="footer-symbol">𖤍</span>
+      <p class="footer-text">
+        Yoru Bot · جميع الحقوق محفوظة
+        <span class="footer-year">© 2026</span>
+      </p>
+    </div>
+
+  </div>
+
+  <script>
+    // Generate floating particles
+    const container = document.getElementById('particles')
+    const count = 25
+    for (let i = 0; i < count; i++) {
+      const p = document.createElement('div')
+      p.className = 'particle'
+      p.style.cssText = `
+        left: ${Math.random() * 100}%;
+        width: ${Math.random() * 2 + 1}px;
+        height: ${Math.random() * 2 + 1}px;
+        animation-duration: ${Math.random() * 12 + 8}s;
+        animation-delay: ${Math.random() * 10}s;
+        opacity: ${Math.random() * 0.5 + 0.1};
+        background: ${Math.random() > 0.5 ? '#9d6fff' : '#f472b6'};
+      `
+      container.appendChild(p)
+    }
+
+    // Ripple on card click
+    document.querySelectorAll('.card').forEach(card => {
+      card.addEventListener('click', function(e) {
+        const ripple = document.createElement('span')
+        const rect = this.getBoundingClientRect()
+        ripple.style.cssText = `
+          position:absolute;
+          border-radius:50%;
+          background:rgba(157,111,255,0.3);
+          width:10px; height:10px;
+          left:${e.clientX - rect.left - 5}px;
+          top:${e.clientY - rect.top - 5}px;
+          transform:scale(0);
+          animation:ripple 0.6s ease-out forwards;
+          pointer-events:none;
+        `
+        this.appendChild(ripple)
+        setTimeout(() => ripple.remove(), 600)
+      })
+    })
+
+    // Inject ripple keyframes
+    const style = document.createElement('style')
+    style.textContent = `@keyframes ripple { to { transform: scale(20); opacity: 0; } }`
+    document.head.appendChild(style)
+  </script>
+
+</body>
+</html>
